@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引用文獻整理系統 · SITE_B</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&family=Crimson+Pro:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- ═══════════════════════════════════════════════
+         SECTION A ── 全域樣式
+    ═══════════════════════════════════════════════ -->
+    <style>
+        :root {
+            --earth-cream: #FAF8F3;
+            --earth-sand: #EDE8DC;
+            --earth-clay: #D4C5B0;
+            --earth-terracotta: #B89778;
+            --earth-bark: #8B7355;
+            --earth-soil: #6B5D4F;
+            --earth-moss: #7A9B8E;
+            --earth-sage: #9DB4A8;
+            --accent-copper: #C4916A;
+            --accent-amber: #DDB892;
+            --accent-rust: #A67153;
+            --shadow: rgba(107, 93, 79, 0.12);
+            --shadow-md: rgba(107, 93, 79, 0.18);
+            --glow: rgba(196, 145, 106, 0.15);
+            --highlight-yellow: rgba(255, 235, 59, 0.6);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background: linear-gradient(165deg, var(--earth-cream) 0%, var(--earth-sand) 50%, #F5F1E8 100%);
+            color: var(--earth-soil);
+            min-height: 100vh;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 25%, var(--glow) 0%, transparent 45%),
+                radial-gradient(circle at 85% 75%, rgba(157, 180, 168, 0.08) 0%, transparent 45%);
+            pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(107,93,79,0.015) 2px, rgba(107,93,79,0.015) 4px);
+            pointer-events: none; z-index: 0;
+        }
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* ── Header ── */
+        header { text-align: center; margin-bottom: 3rem; animation: fadeInDown 1s ease-out; }
+        h1 { font-family:'Crimson Pro',serif; font-size:3.2rem; font-weight:500; color:var(--earth-bark); margin-bottom:0.8rem; letter-spacing:0.05em; text-shadow:1px 1px 2px rgba(255,255,255,0.5); }
+        .subtitle { font-family:'Noto Sans TC',sans-serif; font-size:0.9rem; color:var(--earth-terracotta); font-weight:300; letter-spacing:0.25em; text-transform:uppercase; opacity:0.85; }
+
+        /* ── User bar ── */
+        #userBar {
+            display: none;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem 1.4rem;
+            background: rgba(255,255,255,0.85);
+            border-radius: 50px;
+            border: 1px solid var(--earth-clay);
+            backdrop-filter: blur(8px);
+            flex-wrap: wrap;
+        }
+        #userBar.visible { display: flex; }
+        #userEmail { font-size: 0.88rem; color: var(--earth-bark); font-weight: 500; }
+        #userAvatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid var(--accent-copper);
+            object-fit: cover;
+        }
+
+        /* ── Tabs ── */
+        .nav-tabs { display:flex; justify-content:center; gap:0.8rem; margin-bottom:2.5rem; flex-wrap:wrap; animation:fadeIn 1.2s ease-out 0.3s both; }
+        .tab-btn {
+            padding:0.85rem 2.2rem; border:1.5px solid var(--earth-clay);
+            background:rgba(255,255,255,0.75); color:var(--earth-bark);
+            font-family:'Noto Serif TC',serif; font-size:0.95rem; font-weight:500;
+            cursor:pointer; border-radius:50px;
+            transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+            position:relative; overflow:hidden; letter-spacing:0.03em; backdrop-filter:blur(8px);
+        }
+        .tab-btn::before {
+            content:''; position:absolute; top:50%; left:50%; width:0; height:0;
+            border-radius:50%;
+            background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber));
+            transition:width .5s,height .5s,top .5s,left .5s;
+            transform:translate(-50%,-50%); z-index:-1;
+        }
+        .tab-btn:hover::before { width:280px; height:280px; }
+        .tab-btn:hover { color:white; border-color:var(--accent-copper); transform:translateY(-2px); box-shadow:0 6px 20px var(--shadow); }
+        .tab-btn.active { background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber)); color:white; border-color:var(--accent-copper); box-shadow:0 4px 16px var(--glow); }
+        .tab-content { display:none; animation:fadeInUp 0.7s ease-out; }
+        .tab-content.active { display:block; }
+
+        /* ── Form section ── */
+        .form-section {
+            background:rgba(255,255,255,0.92); padding:2.5rem 3rem; border-radius:24px;
+            box-shadow:0 8px 32px var(--shadow); margin-bottom:2rem;
+            border:1px solid rgba(212,197,176,0.3); backdrop-filter:blur(12px);
+        }
+        .form-section h2 {
+            font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:500;
+            color:var(--earth-bark); margin-bottom:1.8rem;
+            border-bottom:2px solid var(--accent-amber); padding-bottom:0.8rem; letter-spacing:0.02em;
+        }
+
+        /* ── Search ── */
+        .search-bar { margin-bottom:2rem; }
+        .search-bar input {
+            width:100%; padding:1rem 1.8rem; border:1.5px solid var(--earth-clay); border-radius:50px;
+            font-family:'Noto Serif TC',serif; font-size:0.95rem;
+            background:rgba(255,255,255,0.95); color:var(--earth-soil); transition:all 0.3s ease;
+        }
+        .search-bar input::placeholder { color:var(--earth-terracotta); opacity:0.6; }
+        .search-bar input:focus { outline:none; border-color:var(--accent-copper); box-shadow:0 0 0 3px var(--glow); }
+
+        /* ── Form groups ── */
+        .form-group { margin-bottom:1.8rem; }
+        label { display:block; margin-bottom:0.6rem; color:var(--earth-bark); font-weight:500; font-size:0.95rem; }
+        input,textarea,select {
+            width:100%; padding:0.95rem 1.3rem; border:1.5px solid var(--earth-clay); border-radius:12px;
+            font-family:'Noto Serif TC',serif; font-size:0.95rem;
+            background:rgba(255,255,255,0.95); color:var(--earth-soil); transition:all 0.3s ease;
+        }
+        input:focus,textarea:focus,select:focus { outline:none; border-color:var(--accent-copper); box-shadow:0 0 0 3px var(--glow); }
+        textarea { min-height:140px; resize:vertical; line-height:1.7; }
+
+        /* ── Buttons ── */
+        .btn {
+            padding:0.95rem 2.2rem; border:none; border-radius:50px;
+            font-family:'Noto Serif TC',serif; font-size:0.95rem; font-weight:500;
+            cursor:pointer; transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+            display:inline-block; text-align:center; letter-spacing:0.03em;
+        }
+        .btn-primary { background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber)); color:white; box-shadow:0 4px 12px var(--glow); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px var(--glow); }
+        .btn-secondary { background:var(--earth-sage); color:white; }
+        .btn-secondary:hover { background:var(--earth-moss); transform:translateY(-2px); box-shadow:0 4px 12px var(--shadow); }
+        .btn-danger { background:var(--accent-rust); color:white; }
+        .btn-danger:hover { background:#8B5A3C; transform:translateY(-2px); box-shadow:0 4px 12px rgba(166,113,83,0.3); }
+        .btn-small { padding:0.6rem 1.2rem; font-size:0.85rem; }
+        .btn-google {
+            background:white; color:#444; border:1.5px solid var(--earth-clay);
+            display:flex; align-items:center; gap:0.8rem; margin:0 auto;
+            padding:1rem 2.4rem; font-size:1rem;
+            box-shadow:0 2px 8px var(--shadow);
+        }
+        .btn-google:hover { border-color:var(--accent-copper); box-shadow:0 4px 16px var(--shadow-md); transform:translateY(-2px); }
+        .btn-google svg { width:22px; height:22px; flex-shrink:0; }
+        .btn:active { transform:translateY(0); }
+
+        /* ── Projects ── */
+        .project-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; margin-top:2rem; }
+        .project-card {
+            background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(250,248,243,0.95));
+            padding:2rem; border-radius:18px; border:1.5px solid var(--earth-clay);
+            transition:all 0.35s ease; position:relative; overflow:hidden;
+        }
+        .project-card::before { content:''; position:absolute; inset:0 0 auto 0; height:5px; background:linear-gradient(90deg,var(--accent-copper),var(--accent-amber)); opacity:0; transition:opacity 0.35s ease; }
+        .project-card:hover { transform:translateY(-5px); box-shadow:0 8px 24px var(--shadow-md); border-color:var(--accent-copper); }
+        .project-card:hover::before { opacity:1; }
+        .project-card h3 { font-family:'Crimson Pro',serif; font-size:1.4rem; color:var(--earth-bark); margin-bottom:1rem; }
+        .project-card p { color:var(--earth-soil); margin-bottom:1.2rem; line-height:1.7; font-size:0.9rem; }
+        .project-card .btn-group { display:flex; gap:0.8rem; flex-wrap:wrap; }
+
+        /* ── Reference cards ── */
+        .reference-card {
+            background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(250,248,243,0.95));
+            padding:2rem; border-radius:18px; margin-bottom:1.5rem;
+            border:1.5px solid var(--earth-clay); transition:all 0.35s ease;
+            position:relative; overflow:hidden;
+        }
+        .reference-card::before { content:''; position:absolute; inset:0 0 auto 0; height:5px; background:linear-gradient(90deg,var(--accent-copper),var(--accent-amber)); opacity:0; transition:opacity 0.35s ease; }
+        .reference-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px var(--shadow-md); border-color:var(--accent-copper); }
+        .reference-card:hover::before { opacity:1; }
+        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem; gap:1rem; }
+        .card-title { font-family:'Crimson Pro',serif; font-size:1.3rem; color:var(--earth-bark); font-weight:600; line-height:1.5; flex:1; }
+        .card-content { color:var(--earth-soil); margin-bottom:1.2rem; line-height:1.8; font-size:0.95rem; }
+        .card-tags { display:flex; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.2rem; }
+        .tag { display:inline-block; padding:0.4rem 1rem; background:var(--earth-sage); color:white; border-radius:20px; font-size:0.85rem; }
+        .card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--earth-sand); flex-wrap:wrap; gap:1rem; }
+        .card-meta { font-size:0.85rem; color:var(--earth-terracotta); display:flex; gap:1rem; flex-wrap:wrap; }
+        .card-actions { display:flex; gap:0.8rem; flex-wrap:wrap; }
+        .toggle-cited { padding:0.6rem 1.5rem; border:1.5px solid; border-radius:50px; font-size:0.85rem; cursor:pointer; transition:all 0.3s ease; font-weight:500; background:white; }
+        .toggle-cited.cited { border-color:var(--earth-moss); color:var(--earth-moss); }
+        .toggle-cited.not-cited { border-color:var(--earth-clay); color:var(--earth-terracotta); }
+        .toggle-cited:hover { transform:scale(1.05); box-shadow:0 2px 8px var(--shadow); }
+
+        /* ── Filters ── */
+        .filter-section { margin-bottom:2rem; }
+        .filter-btn {
+            padding:0.7rem 1.5rem; border:1.5px solid var(--earth-clay);
+            background:rgba(255,255,255,0.9); color:var(--earth-bark);
+            font-family:'Noto Serif TC',serif; font-size:0.9rem; cursor:pointer;
+            border-radius:50px; transition:all 0.3s ease; margin:0.4rem; display:inline-block;
+        }
+        .filter-btn:hover { background:var(--earth-sand); border-color:var(--accent-copper); }
+        .filter-btn.active { background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber)); color:white; border-color:var(--accent-copper); }
+        .filter-layer { margin-bottom:0.5rem; }
+        .filter-layer-label { font-size:0.8rem; color:var(--earth-terracotta); letter-spacing:0.08em; font-weight:500; margin-bottom:0.5rem; text-transform:uppercase; font-family:'Noto Sans TC',sans-serif; }
+        .keyword-filter-section { margin-top:1rem; padding:1.2rem; background:rgba(237,232,220,0.4); border-radius:12px; border:1px dashed var(--earth-clay); }
+        .keyword-filter-section h4 { font-size:0.9rem; color:var(--earth-bark); margin-bottom:0.8rem; font-weight:500; }
+        .cited-filter-section { margin-top:1rem; padding:1.2rem; background:rgba(122,155,142,0.08); border-radius:12px; border:1px dashed var(--earth-sage); }
+        .cited-filter-section h4 { font-size:0.9rem; color:var(--earth-bark); margin-bottom:0.8rem; font-weight:500; }
+
+        /* ── Modals ── */
+        .modal { display:none; position:fixed; inset:0; background:rgba(107,93,79,0.75); backdrop-filter:blur(8px); z-index:1000; animation:fadeIn 0.3s ease; }
+        .modal.active { display:flex; justify-content:center; align-items:center; }
+        .modal-content { background:white; padding:3rem; border-radius:24px; max-width:700px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(107,93,79,0.3); animation:slideInUp 0.4s cubic-bezier(0.4,0,0.2,1); position:relative; }
+        .modal-close { position:absolute; top:1.5rem; right:1.5rem; background:var(--earth-sand); border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.3rem; color:var(--earth-bark); transition:all 0.3s ease; display:flex; align-items:center; justify-content:center; }
+        .modal-close:hover { background:var(--accent-copper); color:white; transform:rotate(90deg); }
+
+        /* ── Binding modal（無關閉按鈕，強制填入）── */
+        #bindingModal {
+            display:none; position:fixed; inset:0;
+            background:rgba(70,55,40,0.88); backdrop-filter:blur(12px);
+            z-index:5000; justify-content:center; align-items:center;
+        }
+        #bindingModal.active { display:flex; }
+        #bindingModal .modal-content {
+            max-width:640px; border-top:5px solid var(--accent-copper);
+        }
+        .site-id-badge {
+            display:inline-block; padding:0.3rem 1rem;
+            background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber));
+            color:white; border-radius:20px; font-size:0.82rem;
+            font-family:'Noto Sans TC',sans-serif; letter-spacing:0.05em;
+        }
+        .binding-info {
+            background:rgba(196,145,106,0.08); border:1px solid var(--earth-clay);
+            border-radius:12px; padding:1rem 1.4rem; margin-bottom:1.5rem;
+            font-size:0.88rem; color:var(--earth-soil); line-height:1.8;
+        }
+
+        /* ── Notification ── */
+        .notification { position:fixed; top:2rem; right:2rem; padding:1.2rem 2rem; border-radius:12px; color:white; font-weight:500; z-index:2000; animation:slideInRight 0.4s ease; box-shadow:0 8px 24px var(--shadow-md); max-width:400px; }
+        .notification.success { background:linear-gradient(135deg,var(--earth-moss),var(--earth-sage)); }
+        .notification.error { background:linear-gradient(135deg,var(--accent-rust),#A0644A); }
+        .notification.info { background:linear-gradient(135deg,var(--accent-copper),var(--accent-amber)); }
+
+        /* ── Highlight ── */
+        .highlight { background:var(--highlight-yellow); padding:0.1rem 0.2rem; border-radius:3px; font-weight:500; }
+
+        /* ── Loading spinner ── */
+        .loading-overlay {
+            position:fixed; inset:0; background:rgba(250,248,243,0.92);
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            z-index:3000; gap:1.2rem;
+        }
+        .spinner {
+            width:48px; height:48px; border:4px solid var(--earth-clay);
+            border-top-color:var(--accent-copper); border-radius:50%;
+            animation:spin 0.8s linear infinite;
+        }
+        .loading-overlay p { color:var(--earth-bark); font-size:1rem; letter-spacing:0.05em; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* ── Sync badge ── */
+        .sync-badge {
+            display:inline-flex; align-items:center; gap:0.4rem;
+            font-size:0.78rem; color:var(--earth-moss); font-family:'Noto Sans TC',sans-serif;
+        }
+        .sync-dot { width:7px; height:7px; background:var(--earth-moss); border-radius:50%; animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* ── Offline banner ── */
+        #offlineBanner {
+            display:none; position:fixed; top:0; left:0; right:0; z-index:4000;
+            background:linear-gradient(90deg, #A67153, #C4916A);
+            color:white; text-align:center; padding:0.7rem 1rem;
+            font-size:0.88rem; font-family:'Noto Sans TC',sans-serif;
+            letter-spacing:0.04em; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        }
+        #offlineBanner.visible { display:block; }
+        body.has-offline-banner { padding-top:3rem; }
+
+        /* ── Animations ── */
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes fadeInDown { from{opacity:0;transform:translateY(-30px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(30px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes slideInUp { from{opacity:0;transform:translateY(50px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(100px);} to{opacity:1;transform:translateX(0);} }
+
+        @media (max-width:768px) {
+            h1 { font-size:2.2rem; }
+            .form-section { padding:1.8rem 1.5rem; }
+            .project-list { grid-template-columns:1fr; }
+            .modal-content { padding:2rem 1.5rem; width:95%; }
+            .notification { right:1rem; left:1rem; max-width:none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION B ── 載入遮罩
+══════════════════════════════════════════════════════════ -->
+<!-- ── 離線提示橫幅 ── -->
+<div id="offlineBanner">
+    ⚠️ 目前處於離線狀態，資料已暫存本機，連線恢復後將自動同步。Webhook 備份將於上線後自動補發。
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>系統初始化中…</p>
+</div>
+
+<div class="container">
+
+    <header>
+        <h1>引用文獻整理系統</h1>
+        <p class="subtitle">Reference Management · <span style="color:var(--accent-copper);font-weight:500;">SITE_B</span> · Cloud Edition</p>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION C ── Firebase 設定區（首次使用）
+    ══════════════════════════════════════════════════════ -->
+    <div id="firebaseConfigSection" style="display:none;">
+        <div class="form-section" style="max-width:680px; margin:0 auto;">
+            <h2>🔧 Firebase 初始設定</h2>
+            <p style="margin-bottom:1.8rem; color:var(--earth-soil); line-height:1.8;">
+                首次使用請填入您的 Firebase 專案設定。資料僅存於本機 <code>localStorage</code>，不會傳送至任何第三方。
+                <br><br>
+                取得方式：Firebase Console → 專案設定 → 您的應用程式 → SDK 設定與設定
+            </p>
+            <form id="firebaseConfigForm">
+                <div class="form-group">
+                    <label for="cfg_apiKey">API Key *</label>
+                    <input type="text" id="cfg_apiKey" required placeholder="AIzaSy...">
+                </div>
+                <div class="form-group">
+                    <label for="cfg_authDomain">Auth Domain *</label>
+                    <input type="text" id="cfg_authDomain" required placeholder="your-project.firebaseapp.com">
+                </div>
+                <div class="form-group">
+                    <label for="cfg_projectId">Project ID *</label>
+                    <input type="text" id="cfg_projectId" required placeholder="your-project-id">
+                </div>
+                <div class="form-group">
+                    <label for="cfg_databaseURL">Database URL *</label>
+                    <input type="url" id="cfg_databaseURL" required placeholder="https://your-project-default-rtdb.firebaseio.com">
+                    <small style="display:block; margin-top:0.5rem; color:var(--earth-terracotta); font-size:0.84rem;">
+                        請確認 Firebase Realtime Database 已啟用，並包含 https://
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary">儲存設定並啟動</button>
+                <button type="button" class="btn btn-danger" style="margin-left:1rem;" onclick="App.clearFirebaseConfig()">清除設定</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION D ── 登入區
+    ══════════════════════════════════════════════════════ -->
+    <div id="loginSection" style="display:none;">
+        <div class="form-section" style="max-width:480px; margin:0 auto; text-align:center;">
+            <h2 style="text-align:center;">歡迎使用</h2>
+            <p style="margin-bottom:2.5rem; color:var(--earth-soil); line-height:1.8;">
+                請以 Google 帳號登入，您的文獻資料將安全儲存於 Firebase 雲端，並與您的帳號綁定。
+            </p>
+            <button class="btn btn-google" onclick="Auth.signInWithGoogle()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                使用 Google 帳號登入
+            </button>
+            <p style="margin-top:2rem; font-size:0.82rem; color:var(--earth-terracotta);">
+                <a href="#" onclick="App.clearFirebaseConfig()" style="color:var(--earth-terracotta);">重新設定 Firebase</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION E ── 主功能介面（登入後顯示）
+    ══════════════════════════════════════════════════════ -->
+    <div id="mainApp" style="display:none;">
+
+        <!-- 使用者資訊列 -->
+        <div id="userBar">
+            <span class="sync-badge"><span class="sync-dot"></span> 雲端同步中</span>
+            <img id="userAvatar" src="" alt="avatar" style="display:none;">
+            <span id="userEmail"></span>
+            <button class="btn btn-danger btn-small" onclick="Auth.signOut()">登出</button>
+        </div>
+
+        <!-- 導覽列 -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="UI.switchTab('all', this)">所有文獻</button>
+            <button class="tab-btn" onclick="UI.switchTab('projects', this)">計畫管理</button>
+            <button class="tab-btn" onclick="UI.switchTab('add', this)">新增文獻</button>
+            <button class="tab-btn" onclick="UI.switchTab('export', this)">匯出資料</button>
+        </nav>
+
+        <!-- ── 所有文獻 ── -->
+        <div id="allTab" class="tab-content active">
+            <div class="form-section">
+                <h2>所有引用文獻</h2>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 搜尋文獻內容、主題、期刊標題、APA…">
+                </div>
+                <div class="filter-section">
+                    <div class="filter-layer">
+                        <div class="filter-layer-label">第一層・計畫</div>
+                        <div id="projectFilters"></div>
+                    </div>
+                    <div id="citedFilterContainer"></div>
+                    <div id="keywordFiltersContainer"></div>
+                </div>
+                <div id="searchResultCount" style="font-size:0.88rem;color:var(--earth-terracotta);margin-bottom:1rem;display:none;"></div>
+                <div id="allReferencesContainer"></div>
+            </div>
+        </div>
+
+        <!-- ── 計畫管理 ── -->
+        <div id="projectsTab" class="tab-content">
+            <div class="form-section">
+                <h2>新增計畫</h2>
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label for="projectName">計畫名稱 *</label>
+                        <input type="text" id="projectName" required placeholder="請輸入計畫名稱…">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDesc">計畫描述</label>
+                        <textarea id="projectDesc" placeholder="請輸入計畫描述…"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">新增計畫</button>
+                </form>
+            </div>
+            <div class="form-section">
+                <h2>現有計畫</h2>
+                <div id="projectsList" class="project-list"></div>
+            </div>
+        </div>
+
+        <!-- ── 新增文獻 ── -->
+        <div id="addTab" class="tab-content">
+            <div class="form-section">
+                <h2>新增引用文獻</h2>
+                <form id="referenceForm">
+                    <div class="form-group">
+                        <label for="refContent">引用文獻內容 *</label>
+                        <textarea id="refContent" required placeholder="請輸入引用的文獻內容…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="journalTitle">期刊標題</label>
+                        <input type="text" id="journalTitle" placeholder="請輸入期刊標題…">
+                    </div>
+                    <div class="form-group">
+                        <label for="originalJournalTitle">原期刊標題</label>
+                        <input type="text" id="originalJournalTitle" placeholder="請輸入原期刊標題…">
+                    </div>
+                    <div class="form-group">
+                        <label for="keywords">引用主題 * (使用逗號分隔)</label>
+                        <input type="text" id="keywords" required placeholder="例如：氣候變遷, 永續發展, 環境保護">
+                    </div>
+                    <div class="form-group">
+                        <label for="journalAPA">期刊 APA</label>
+                        <textarea id="journalAPA" placeholder="請輸入 APA 格式的期刊引用…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="originalAPA">原期刊 APA</label>
+                        <textarea id="originalAPA" placeholder="請輸入 APA 格式的原期刊引用…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectSelect">所屬計畫 *</label>
+                        <select id="projectSelect" required>
+                            <option value="">請選擇計畫…</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">儲存文獻</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── 匯出資料 ── -->
+        <div id="exportTab" class="tab-content">
+            <!-- Webhook 設定 -->
+            <div class="form-section">
+                <h2>🔗 Webhook 自動化設定</h2>
+                <p style="margin-bottom:1.5rem; color:var(--earth-soil); line-height:1.8;">
+                    設定後每次儲存、編輯或切換引用狀態，系統自動以 <strong>POST</strong> 發送標準化 JSON 到指定位址。
+                    Webhook URL 儲存於您的 Firebase 帳號，多裝置共享。
+                </p>
+                <div style="margin-bottom:1.5rem; padding:0.9rem 1.4rem; background:var(--earth-cream); border-radius:10px; border:1px solid var(--earth-clay); font-size:0.9rem;">
+                    <strong style="color:var(--earth-bark);">目前狀態：</strong>
+                    <span id="webhookStatus">○ 尚未設定</span>
+                </div>
+                <form id="webhookForm">
+                    <div class="form-group">
+                        <label for="webhookUrl">Webhook URL</label>
+                        <input type="url" id="webhookUrl" placeholder="https://hooks.make.com/your-scenario-id">
+                        <small style="display:block; margin-top:0.5rem; color:var(--earth-terracotta); font-size:0.85rem;">
+                            請輸入完整 URL（含 https://）。儲存後自動同步至 Firebase。
+                        </small>
+                    </div>
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                        <button type="submit" class="btn btn-primary">儲存 Webhook 設定</button>
+                        <button type="button" class="btn btn-secondary" onclick="Webhook.test()">測試連線</button>
+                        <button type="button" class="btn btn-danger" onclick="Webhook.clear()">清除設定</button>
+                    </div>
+                </form>
+
+                <!-- JSON 格式說明 -->
+                <div style="margin-top:2.5rem; padding:2rem; background:var(--earth-cream); border-radius:14px; border:1px solid var(--earth-clay);">
+                    <h3 style="font-size:1.2rem; color:var(--earth-bark); margin-bottom:0.5rem;">📋 發送的 JSON 資料格式</h3>
+                    <p style="margin-bottom:1.2rem; color:var(--earth-soil); line-height:1.7; font-size:0.9rem;">
+                        每次<strong>新增</strong>、<strong>編輯</strong>或<strong>切換引用狀態</strong>時觸發。
+                    </p>
+                    <pre style="background:#2d2d2d; color:#f8f8f2; padding:1.5rem; border-radius:10px; overflow-x:auto; font-size:0.85rem; line-height:1.9;"><code>{
+  "reference_content":      "引用的文獻內容全文…",
+  "journal_title":          "期刊標題（中文）",
+  "original_journal_title": "Original Journal Title",
+  "journal_apa":            "Author, A. (2026). 文章. 期刊, 1(1), 1-10.",
+  "original_journal_apa":   "Author, A. (2026). Title. Journal, 1(1), 1-10.",
+  "citation_topics":        "氣候變遷, 永續發展",
+  "project_name":           "所屬計畫名稱"
+}</code></pre>
+                    <div style="margin-top:1.5rem; padding:1.2rem; background:rgba(122,155,142,0.1); border-left:4px solid var(--earth-moss); border-radius:6px;">
+                        <strong style="color:var(--earth-bark); display:block; margin-bottom:0.8rem;">🔑 欄位定義</strong>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.87rem; color:var(--earth-soil);">
+                            <thead><tr style="border-bottom:1.5px solid var(--earth-clay);">
+                                <th style="text-align:left; padding:0.5rem 0.8rem; color:var(--earth-bark);">Key</th>
+                                <th style="text-align:left; padding:0.5rem 0.8rem; color:var(--earth-bark);">對應欄位</th>
+                                <th style="text-align:left; padding:0.5rem 0.8rem; color:var(--earth-bark);">型別</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>reference_content</code></td><td style="padding:0.5rem 0.8rem;">引用文獻內容</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>journal_title</code></td><td style="padding:0.5rem 0.8rem;">期刊標題</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>original_journal_title</code></td><td style="padding:0.5rem 0.8rem;">原期刊標題</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>journal_apa</code></td><td style="padding:0.5rem 0.8rem;">期刊 APA</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>original_journal_apa</code></td><td style="padding:0.5rem 0.8rem;">原期刊 APA</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr style="border-bottom:1px solid var(--earth-sand);"><td style="padding:0.5rem 0.8rem;"><code>citation_topics</code></td><td style="padding:0.5rem 0.8rem;">引用主題</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                                <tr><td style="padding:0.5rem 0.8rem;"><code>project_name</code></td><td style="padding:0.5rem 0.8rem;">所屬計畫名稱</td><td style="padding:0.5rem 0.8rem;">String</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 匯出檔案 -->
+            <div class="form-section">
+                <h2>📦 匯出資料檔案</h2>
+                <p style="margin-bottom:2rem; color:var(--earth-soil); line-height:1.8;">匯出您帳號下的所有文獻資料。</p>
+                <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="Export.downloadCSV()">下載 CSV 檔案</button>
+                    <button class="btn btn-secondary" onclick="Export.downloadJSON()">下載 JSON 檔案</button>
+                </div>
+            </div>
+
+            <!-- 解除綁定 -->
+            <div class="form-section">
+                <h2>⚙️ 系統綁定管理</h2>
+                <div id="bindingStatusBlock" style="margin-bottom:1.5rem; padding:1rem 1.4rem; background:var(--earth-cream); border-radius:10px; border:1px solid var(--earth-clay); font-size:0.9rem; line-height:1.8;">
+                </div>
+                <p style="margin-bottom:1.5rem; color:var(--earth-soil); line-height:1.8; font-size:0.9rem;">
+                    若需切換 Firebase 專案或 Site ID，請點擊「解除綁定」。操作後將清除本機所有綁定設定並重新整理頁面，下次開啟時需重新填寫綁定資料。
+                </p>
+                <button class="btn btn-danger" onclick="BindingManager.unbind()">🔓 解除綁定</button>
+            </div>
+        </div>
+
+    </div><!-- /mainApp -->
+
+</div><!-- /container -->
+
+<!-- ── 檢視文獻 Modal ── -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="UI.closeViewModal()">✕</button>
+        <div id="viewModalContent"></div>
+    </div>
+</div>
+
+<!-- ── 編輯文獻 Modal ── -->
+<div id="editRefModal" class="modal">
+    <div class="modal-content" style="max-width:780px;">
+        <button class="modal-close" onclick="UI.closeEditRefModal()">✕</button>
+        <h2 style="font-family:'Crimson Pro',serif; color:var(--earth-bark); margin-bottom:1.8rem; border-bottom:2px solid var(--accent-amber); padding-bottom:0.8rem;">編輯文獻</h2>
+        <form id="editRefForm">
+            <input type="hidden" id="editRefId">
+            <div class="form-group"><label>引用文獻內容 *</label><textarea id="editRefContent" required style="min-height:120px;"></textarea></div>
+            <div class="form-group"><label>期刊標題</label><input type="text" id="editJournalTitle"></div>
+            <div class="form-group"><label>原期刊標題</label><input type="text" id="editOriginalJournalTitle"></div>
+            <div class="form-group"><label>引用主題 * (逗號分隔)</label><input type="text" id="editKeywords" required></div>
+            <div class="form-group"><label>期刊 APA</label><textarea id="editJournalAPA" style="min-height:90px;"></textarea></div>
+            <div class="form-group"><label>原期刊 APA</label><textarea id="editOriginalAPA" style="min-height:90px;"></textarea></div>
+            <div class="form-group"><label>所屬計畫 *</label><select id="editProjectSelect" required></select></div>
+            <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.5rem;">
+                <button type="submit" class="btn btn-primary">儲存變更</button>
+                <button type="button" class="btn btn-secondary" onclick="UI.closeEditRefModal()">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── 編輯計畫 Modal ── -->
+<div id="editProjectModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="UI.closeEditProjectModal()">✕</button>
+        <h2 style="font-family:'Crimson Pro',serif; color:var(--earth-bark); margin-bottom:1.5rem;">編輯計畫</h2>
+        <form id="editProjectForm">
+            <input type="hidden" id="editProjectId">
+            <div class="form-group"><label>計畫名稱 *</label><input type="text" id="editProjectName" required></div>
+            <div class="form-group"><label>計畫描述</label><textarea id="editProjectDesc"></textarea></div>
+            <button type="submit" class="btn btn-primary">儲存變更</button>
+        </form>
+    </div>
+</div>
+
+<!-- ── 🔒 SITE_B 綁定 Modal（強制，無法關閉）── -->
+<div id="bindingModal">
+    <div class="modal-content">
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.6rem;">
+            <h2 style="font-family:'Crimson Pro',serif; color:var(--earth-bark); margin:0;">🔒 SITE_B 初始綁定</h2>
+            <span class="site-id-badge">SITE_B</span>
+        </div>
+        <p style="font-size:0.9rem; color:var(--earth-soil); margin-bottom:1.5rem; line-height:1.8;">
+            首次使用請完成以下綁定設定。所有資料將以前綴 <code>SITE_B_v1_</code> 隔離儲存，與其他網站完全獨立。
+        </p>
+        <div class="binding-info">
+            <strong>Firebase Config：</strong>Firebase Console → 專案設定 → 您的應用程式 → SDK 設定<br>
+            <strong>Webhook URL：</strong>Make.com / Zapier 等服務的接收端點（含 https://），綁定後所有觸發均自動附帶 <code>site_id: "SITE_B"</code>。
+        </div>
+        <form id="bindingForm">
+            <!-- Firebase Config -->
+            <div style="padding:1.2rem; background:rgba(196,145,106,0.06); border-radius:12px; border:1px solid var(--earth-clay); margin-bottom:1.5rem;">
+                <div style="font-size:0.82rem; color:var(--earth-terracotta); letter-spacing:0.08em; text-transform:uppercase; font-weight:500; margin-bottom:1rem; font-family:'Noto Sans TC',sans-serif;">
+                    Firebase Config
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label for="bind_apiKey">API Key *</label>
+                    <input type="text" id="bind_apiKey" required placeholder="AIzaSy…">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label for="bind_authDomain">Auth Domain *</label>
+                    <input type="text" id="bind_authDomain" required placeholder="your-project.firebaseapp.com">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label for="bind_projectId">Project ID *</label>
+                    <input type="text" id="bind_projectId" required placeholder="your-project-id">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="bind_databaseURL">Database URL *</label>
+                    <input type="url" id="bind_databaseURL" required placeholder="https://your-project-default-rtdb.firebaseio.com">
+                </div>
+            </div>
+            <!-- Webhook URL（需求 2：雙重綁定輸入）-->
+            <div style="padding:1.2rem; background:rgba(122,155,142,0.06); border-radius:12px; border:1px solid var(--earth-sage); margin-bottom:1.5rem;">
+                <div style="font-size:0.82rem; color:var(--earth-moss); letter-spacing:0.08em; text-transform:uppercase; font-weight:500; margin-bottom:1rem; font-family:'Noto Sans TC',sans-serif;">
+                    Webhook URL（Make.com / Zapier）
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="bind_webhookUrl">Webhook URL *</label>
+                    <input type="url" id="bind_webhookUrl" required placeholder="https://hooks.make.com/your-scenario-id">
+                    <small style="display:block; margin-top:0.5rem; color:var(--earth-terracotta); font-size:0.82rem;">
+                        儲存後自動同步至 Firebase，且所有 Payload 硬編碼 <code>site_id: "SITE_B"</code>
+                    </small>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:1.1rem;">完成 SITE_B 綁定並啟動</button>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     Firebase v9+ Compatibility SDK (compat)
+══════════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION F ── 應用程式主邏輯（IIFE 避免全域污染）
+══════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════════
+       SITE_B 專屬識別碼（硬編碼，不可更改）
+    ═══════════════════════════════════════════════════════════ */
+    const SITE_ID        = 'SITE_B';                    // 需求 3：Payload 硬編碼
+    const FIREBASE_INSTANCE_NAME = 'site_b_instance';  // 需求 4：Firebase 具名實例
+
+    /* ═══════════════════════════════════════════════════════════
+       需求 1：全域 localStorage 命名空間
+       所有 key 一律為 STORAGE_PREFIX + '_' + key
+    ═══════════════════════════════════════════════════════════ */
+    const STORAGE_PREFIX = 'SITE_B_v1';
+
+    /** 統一的 localStorage 存取器，強制套用前綴 */
+    const Store = {
+        key(k)        { return `${STORAGE_PREFIX}_${k}`; },
+        get(k)        { try { return localStorage.getItem(this.key(k)); }         catch(e){ return null; } },
+        set(k, v)     { try { localStorage.setItem(this.key(k), v); }             catch(e){} },
+        getJSON(k)    { try { return JSON.parse(this.get(k) || 'null'); }          catch(e){ return null; } },
+        setJSON(k, v) { try { this.set(k, JSON.stringify(v)); }                    catch(e){} },
+        remove(k)     { try { localStorage.removeItem(this.key(k)); }              catch(e){} },
+        /** 清除本站所有 key（以 STORAGE_PREFIX 開頭）*/
+        clearAll() {
+            try {
+                Object.keys(localStorage)
+                    .filter(k => k.startsWith(STORAGE_PREFIX + '_'))
+                    .forEach(k => localStorage.removeItem(k));
+            } catch(e) {}
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-1  執行時狀態
+    ═══════════════════════════════════════════════════════════ */
+    const State = {
+        app:  null,   // Firebase 具名實例
+        db:   null,
+        auth: null,
+        user: null,
+        references: [],
+        projects:   [],
+        webhookUrl: '',
+        isOnline:   true,
+        isLocked:   true,   // 需求 5：預設鎖定，通過雙重檢查才解鎖
+        filter: { project: 'all', keyword: 'all', cited: 'all', search: '' }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-2  本機快照（全部使用 Store，確保 STORAGE_PREFIX 前綴）
+    ═══════════════════════════════════════════════════════════ */
+    const LocalBackup = {
+        saveRefs(refs)   { Store.setJSON('backup_references', refs); },
+        saveProjects(p)  { Store.setJSON('backup_projects',   p);    },
+        saveWebhook(url) { Store.set('backup_webhookUrl',     url || ''); },
+
+        loadRefs()     { return Store.getJSON('backup_references') || []; },
+        loadProjects() { return Store.getJSON('backup_projects')   || []; },
+        loadWebhook()  { return Store.get('backup_webhookUrl')     || ''; },
+
+        enqueue(item) {
+            const q = this.loadQueue();
+            q.push({ ...item, ts: Date.now(), retries: 0 });
+            Store.setJSON('webhook_queue', q);
+        },
+        loadQueue()  { return Store.getJSON('webhook_queue') || []; },
+        saveQueue(q) { Store.setJSON('webhook_queue', q); },
+        clearQueue() { Store.remove('webhook_queue'); }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-3  BindingManager
+           需求 1：config key = SITE_B_v1_firebase_config
+           需求 2：綁定視窗同時包含 Firebase Config + Webhook URL
+           需求 5：無綁定資料 → 強制鎖定，顯示 Modal
+    ═══════════════════════════════════════════════════════════ */
+    const BindingManager = {
+        CONFIG_KEY:  'firebase_config',   // → 實際 key: SITE_B_v1_firebase_config
+        WEBHOOK_KEY: 'init_webhook_url',  // → 實際 key: SITE_B_v1_init_webhook_url
+
+        /** 讀取綁定資料，回傳 { config, webhookUrl } 或 null */
+        load() {
+            const config     = Store.getJSON(this.CONFIG_KEY);
+            const webhookUrl = Store.get(this.WEBHOOK_KEY) || '';
+            if (!config ||
+                !config.apiKey || !config.authDomain ||
+                !config.projectId || !config.databaseURL) return null;
+            return { config, webhookUrl };
+        },
+
+        /** 需求 2：儲存 Firebase Config + Webhook URL，然後重新載入 */
+        save(config, webhookUrl) {
+            Store.setJSON(this.CONFIG_KEY,  config);
+            Store.set(this.WEBHOOK_KEY, webhookUrl || '');
+            location.reload();
+        },
+
+        /** 需求 6（解除綁定）：只清除 SITE_B 的 key，不影響其他網站 */
+        unbind() {
+            if (!confirm(
+                `確定要解除 ${SITE_ID} 綁定嗎？\n\n` +
+                `將清除所有以「${STORAGE_PREFIX}_」開頭的本機設定，\n` +
+                `雲端 Firebase 資料不受影響。`
+            )) return;
+            Store.clearAll();
+            location.reload();
+        },
+
+        showModal() {
+            document.getElementById('bindingModal').classList.add('active');
+        },
+
+        updateStatusBlock() {
+            const el = document.getElementById('bindingStatusBlock');
+            if (!el) return;
+            el.innerHTML = `
+                <div style="display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center;">
+                    <span><strong style="color:var(--earth-bark);">Site：</strong>
+                        <span class="site-id-badge">${SITE_ID}</span>
+                    </span>
+                    <span><strong style="color:var(--earth-bark);">前綴：</strong>
+                        <code style="font-size:0.8rem;">${STORAGE_PREFIX}_</code>
+                    </span>
+                    <span><strong style="color:var(--earth-bark);">系統狀態：</strong>
+                        ${State.isLocked
+                            ? '<span style="color:var(--accent-rust);">🔒 鎖定中</span>'
+                            : '<span style="color:var(--earth-moss);">🔓 已解鎖</span>'}
+                    </span>
+                    <span><strong style="color:var(--earth-bark);">UID：</strong>
+                        <code style="font-size:0.8rem;color:var(--earth-soil);">${State.user ? State.user.uid : '未登入'}</code>
+                    </span>
+                </div>`;
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-4  FirebaseInit
+           需求 4：具名實例 'site_b_instance'，嚴禁無參數預設實例
+    ═══════════════════════════════════════════════════════════ */
+    const FirebaseInit = {
+        init(config) {
+            try {
+                // 需求 4：固定使用 FIREBASE_INSTANCE_NAME = 'site_b_instance'
+                const existing = firebase.apps.find(a => a.name === FIREBASE_INSTANCE_NAME);
+                State.app  = existing || firebase.initializeApp(config, FIREBASE_INSTANCE_NAME);
+                State.auth = State.app.auth();       // 明確傳入具名 app
+                State.db   = State.app.database();   // 明確傳入具名 app
+                // 連線狀態監控
+                State.db.ref('.info/connected').on('value', snap => {
+                    ConnectionMonitor.setOnline(snap.val() === true);
+                });
+                return true;
+            } catch(e) {
+                console.error(`[${SITE_ID}] Firebase 初始化失敗:`, e);
+                return false;
+            }
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-5  連線狀態監控
+    ═══════════════════════════════════════════════════════════ */
+    const ConnectionMonitor = {
+        setOnline(online) {
+            const was = State.isOnline;
+            State.isOnline = online;
+            const banner = document.getElementById('offlineBanner');
+            const dot    = document.querySelector('.sync-dot');
+            if (online) {
+                banner.classList.remove('visible');
+                document.body.classList.remove('has-offline-banner');
+                if (dot) dot.style.background = 'var(--earth-moss)';
+                if (!was) Webhook.flushQueue();
+            } else {
+                banner.classList.add('visible');
+                document.body.classList.add('has-offline-banner');
+                if (dot) dot.style.background = 'var(--accent-copper)';
+            }
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-6  Auth
+    ═══════════════════════════════════════════════════════════ */
+    const Auth = {
+        signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            State.auth.signInWithPopup(provider)
+                .catch(err => showNotification('登入失敗：' + err.message, 'error'));
+        },
+
+        signOut() { State.auth.signOut(); },
+
+        async handleStateChange(user) {
+            hideLoading();
+
+            const binding   = BindingManager.load();
+            const bindingOk = binding !== null;
+            const authOk    = user   !== null;
+
+            // 需求 5：兩個條件都滿足才解鎖
+            State.isLocked = !(bindingOk && authOk);
+
+            if (!State.isLocked && user) {
+                State.user = user;
+                document.getElementById('userEmail').textContent = user.email;
+                const av = document.getElementById('userAvatar');
+                if (user.photoURL) { av.src = user.photoURL; av.style.display = 'inline-block'; }
+                document.getElementById('userBar').classList.add('visible');
+                show('mainApp'); hide('loginSection');
+                await DataLayer.loadAll();
+                BindingManager.updateStatusBlock();
+
+            } else if (!user) {
+                State.user = null; State.isLocked = true;
+                State.references = []; State.projects = []; State.webhookUrl = '';
+                hide('mainApp'); show('loginSection');
+                document.getElementById('userBar').classList.remove('visible');
+
+            } else {
+                State.isLocked = true;
+                hide('mainApp'); BindingManager.showModal();
+            }
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-7  DataLayer — 路徑: users/${uid}/data
+    ═══════════════════════════════════════════════════════════ */
+    const DataLayer = {
+        uid()         { return State.user.uid; },
+        litRef()      { return State.db.ref(`users/${this.uid()}/data/literature`); },
+        projectsRef() { return State.db.ref(`users/${this.uid()}/data/projects`);   },
+        webhookRef()  { return State.db.ref(`users/${this.uid()}/data/settings/webhookUrl`); },
+
+        async loadAll() {
+            showLoading('讀取雲端資料…');
+
+            // 先用本機快照（所有讀取均透過 Store，帶 STORAGE_PREFIX）
+            const cachedRefs  = LocalBackup.loadRefs();
+            const cachedProjs = LocalBackup.loadProjects();
+            if (cachedRefs.length)  State.references = cachedRefs;
+            if (cachedProjs.length) State.projects   = cachedProjs;
+            if (cachedRefs.length || cachedProjs.length) {
+                UI.renderProjectSelect(); UI.loadProjects(); UI.renderProjectFilters();
+            }
+
+            // Webhook URL（先讀本機快照，再以雲端覆蓋）
+            State.webhookUrl = LocalBackup.loadWebhook();
+            const urlEl = document.getElementById('webhookUrl');
+            if (urlEl && State.webhookUrl) urlEl.value = State.webhookUrl;
+            Webhook.updateStatus();
+
+            // Firebase 即時監聽 Webhook
+            this.webhookRef().on('value', snap => {
+                const val = snap.val() || '';
+                State.webhookUrl = val;
+                LocalBackup.saveWebhook(val);
+                const el = document.getElementById('webhookUrl');
+                if (el) el.value = val;
+                Webhook.updateStatus();
+            });
+
+            // 計畫（即時監聽，空值不覆蓋）
+            this.projectsRef().on('value', snap => {
+                const raw = snap.val();
+                if (raw !== null) {
+                    State.projects = Object.values(raw);
+                    LocalBackup.saveProjects(State.projects);
+                }
+                UI.renderProjectSelect(); UI.loadProjects(); UI.renderProjectFilters();
+            });
+
+            // 文獻（即時監聽，空值不覆蓋）
+            this.litRef().on('value', snap => {
+                const raw = snap.val();
+                if (raw !== null) {
+                    State.references = Object.values(raw);
+                    LocalBackup.saveRefs(State.references);
+                }
+                UI.renderProjectFilters(); hideLoading();
+            }, err => {
+                console.warn(`[${SITE_ID}] Firebase 讀取失敗，使用本機快照:`, err);
+                hideLoading();
+            });
+        },
+
+        async saveReference(ref) {
+            try {
+                await this.litRef().child(String(ref.id)).set(ref);
+                const idx = State.references.findIndex(r => r.id === ref.id);
+                if (idx >= 0) State.references[idx] = ref; else State.references.push(ref);
+                LocalBackup.saveRefs(State.references);
+            } catch(e) { console.error(`[${SITE_ID}] 儲存文獻失敗:`, e); throw e; }
+        },
+
+        async updateReference(fields) {
+            try {
+                await this.litRef().child(String(fields.id)).update(fields);
+                const idx = State.references.findIndex(r => r.id === fields.id);
+                if (idx >= 0) State.references[idx] = { ...State.references[idx], ...fields };
+                LocalBackup.saveRefs(State.references);
+            } catch(e) { console.error(`[${SITE_ID}] 更新文獻失敗:`, e); throw e; }
+        },
+
+        async deleteReference(id) {
+            try {
+                await this.litRef().child(String(id)).remove();
+                State.references = State.references.filter(r => r.id !== id);
+                LocalBackup.saveRefs(State.references);
+            } catch(e) { console.error(`[${SITE_ID}] 刪除文獻失敗:`, e); throw e; }
+        },
+
+        async saveProject(project) {
+            try {
+                await this.projectsRef().child(String(project.id)).set(project);
+                State.projects.push(project);
+                LocalBackup.saveProjects(State.projects);
+            } catch(e) { console.error(`[${SITE_ID}] 儲存計畫失敗:`, e); throw e; }
+        },
+
+        async updateProject(project) {
+            try {
+                await this.projectsRef().child(String(project.id)).update(project);
+                const idx = State.projects.findIndex(p => p.id === project.id);
+                if (idx >= 0) State.projects[idx] = { ...State.projects[idx], ...project };
+                LocalBackup.saveProjects(State.projects);
+            } catch(e) { console.error(`[${SITE_ID}] 更新計畫失敗:`, e); throw e; }
+        },
+
+        async deleteProject(id) {
+            try {
+                await this.projectsRef().child(String(id)).remove();
+                const updates = {};
+                State.references.filter(r => r.projectId === id)
+                    .forEach(r => { updates[String(r.id) + '/projectId'] = null; });
+                if (Object.keys(updates).length) await this.litRef().update(updates);
+                State.projects = State.projects.filter(p => p.id !== id);
+                LocalBackup.saveProjects(State.projects);
+            } catch(e) { console.error(`[${SITE_ID}] 刪除計畫失敗:`, e); throw e; }
+        },
+
+        async saveWebhookUrl(url) {
+            State.webhookUrl = url;
+            LocalBackup.saveWebhook(url);
+            await this.webhookRef().set(url || null);
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-8  Webhook
+           需求 3：Payload 硬編碼 site_id: 'SITE_B'
+           需求 5：isLocked 時禁止觸發
+    ═══════════════════════════════════════════════════════════ */
+    const Webhook = {
+        getUrl() { return State.webhookUrl || ''; },
+
+        /** 需求 3：site_id 硬編碼為 SITE_ID 常數 'SITE_B' */
+        buildPayload(ref) {
+            const project = State.projects.find(p => p.id === ref.projectId);
+            return {
+                reference_content:       ref.refContent           || '',
+                journal_title:           ref.journalTitle         || '',
+                original_journal_title:  ref.originalJournalTitle || '',
+                journal_apa:             ref.journalAPA           || '',
+                original_journal_apa:    ref.originalAPA          || '',
+                citation_topics:         ref.keywords             || '',
+                project_name:            project ? project.name : '未分類',
+                uid:     State.user ? State.user.uid : '',
+                site_id: SITE_ID   // 硬編碼 'SITE_B'，不從 State 讀取
+            };
+        },
+
+        async send(ref) {
+            // 需求 5：isLocked 時禁止一切 Webhook 觸發
+            if (State.isLocked) {
+                console.warn(`[${SITE_ID}][Webhook] 系統鎖定中，禁止觸發`);
+                return;
+            }
+            const url = this.getUrl();
+            if (!url) return;
+            const payload = this.buildPayload(ref);
+            const sent = await this._post(url, payload);
+            if (!sent) {
+                LocalBackup.enqueue({ url, payload });
+                showNotification('⚠ Webhook 暫時失敗，已加入自動補發佇列', 'info');
+            }
+        },
+
+        async _post(url, payload, timeoutMs = 12000) {
+            try {
+                const ctrl  = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+                const res   = await fetch(url, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(payload),
+                    signal:  ctrl.signal
+                });
+                clearTimeout(timer);
+                return res.ok;
+            } catch(e) { return false; }
+        },
+
+        async flushQueue() {
+            const q = LocalBackup.loadQueue();
+            if (q.length === 0) return;
+            const MAX_RETRIES = 5;
+            const remaining = [];
+            for (const item of q) {
+                if (item.retries >= MAX_RETRIES) continue;
+                const delay = Math.min(1000 * Math.pow(2, item.retries), 30000);
+                await new Promise(r => setTimeout(r, delay));
+                const sent = await this._post(
+                    item.payload?.url || this.getUrl(),
+                    item.payload?.payload || item.payload
+                );
+                if (!sent) remaining.push({ ...item, retries: item.retries + 1 });
+            }
+            if (remaining.length === 0) {
+                LocalBackup.clearQueue();
+                if (q.length > 0) showNotification(`✓ ${q.length} 筆 Webhook 已補發成功`, 'success');
+            } else {
+                LocalBackup.saveQueue(remaining);
+                showNotification(`⚠ ${remaining.length} 筆補發失敗，將繼續重試`, 'info');
+            }
+        },
+
+        async test() {
+            if (State.isLocked) { showNotification('系統鎖定中，無法測試 Webhook', 'error'); return; }
+            const url = this.getUrl();
+            if (!url) { showNotification('尚未設定 Webhook URL', 'error'); return; }
+            showNotification('傳送測試資料中…', 'info');
+            const testPayload = {
+                reference_content:      '這是 SITE_B 測試資料，用於確認 Webhook 連線是否正常。',
+                journal_title:          '測試期刊標題',
+                original_journal_title: 'Test Journal Title',
+                journal_apa:            'Author, A. (2026). Test. Journal, 1(1), 1-10.',
+                original_journal_apa:   'Author, A. (2026). Test. Journal, 1(1), 1-10.',
+                citation_topics:        '測試主題, Webhook',
+                project_name:           '測試計畫',
+                uid:                    State.user ? State.user.uid : 'test-uid',
+                site_id:                SITE_ID   // 硬編碼 'SITE_B'
+            };
+            const sent = await this._post(url, testPayload);
+            sent
+                ? showNotification('✓ 測試成功！Webhook 連線正常', 'success')
+                : showNotification('✗ 連線失敗，請確認 URL 是否正確', 'error');
+        },
+
+        async clear() {
+            if (!confirm('確定要清除 Webhook 設定嗎？')) return;
+            await DataLayer.saveWebhookUrl('');
+            document.getElementById('webhookUrl').value = '';
+            this.updateStatus();
+            showNotification('Webhook 設定已清除', 'success');
+        },
+
+        updateStatus() {
+            const el = document.getElementById('webhookStatus');
+            if (!el) return;
+            const url  = this.getUrl();
+            const qLen = LocalBackup.loadQueue().length;
+            const qBadge = qLen > 0
+                ? ` <span style="background:var(--accent-rust);color:white;font-size:0.78rem;padding:0.1rem 0.6rem;border-radius:10px;margin-left:0.5rem;">${qLen} 筆待補發</span>`
+                : '';
+            el.innerHTML = url
+                ? `<span style="color:var(--earth-moss);">● 已設定</span> <code style="font-size:0.82rem;color:var(--earth-soil);word-break:break-all;">${url}</code>${qBadge}`
+                : `<span style="color:var(--earth-terracotta);">○ 尚未設定</span>`;
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-9  UI 渲染模組（原版完整保留）
+    ═══════════════════════════════════════════════════════════ */
+    const UI = {
+        switchTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const map = { all:'allTab', projects:'projectsTab', add:'addTab', export:'exportTab' };
+            document.getElementById(map[tab]).classList.add('active');
+            if (btn) btn.classList.add('active');
+            if (tab === 'projects') this.loadProjects();
+            if (tab === 'all')      this.renderProjectFilters();
+            if (tab === 'export')   BindingManager.updateStatusBlock();
+        },
+
+        renderProjectSelect() {
+            ['projectSelect', 'editProjectSelect'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">請選擇計畫…</option>' +
+                    State.projects.map(p =>
+                        `<option value="${p.id}" ${p.id == prev ? 'selected' : ''}>${p.name}</option>`
+                    ).join('');
+            });
+        },
+
+        loadProjects() {
+            const container = document.getElementById('projectsList');
+            if (!container) return;
+            if (State.projects.length === 0) {
+                container.innerHTML = '<p style="color:var(--earth-terracotta);text-align:center;padding:2rem;">尚無計畫，請先新增計畫。</p>';
+                return;
+            }
+            container.innerHTML = State.projects.map(project => {
+                const refCount = State.references.filter(r => r.projectId === project.id).length;
+                return `<div class="project-card">
+                    <h3>${project.name}</h3>
+                    <p>${project.description || '無描述'}</p>
+                    <p style="font-size:0.85rem;color:var(--earth-terracotta);">文獻數量: ${refCount}</p>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary btn-small" onclick="UI.editProject(${project.id})">編輯</button>
+                        <button class="btn btn-danger btn-small" onclick="UI.deleteProject(${project.id})">刪除</button>
+                    </div>
+                </div>`;
+            }).join('');
+        },
+
+        async deleteProject(projectId) {
+            const refCount = State.references.filter(r => r.projectId === projectId).length;
+            const msg = refCount > 0
+                ? `此計畫包含 ${refCount} 篇文獻，刪除後這些文獻將變成未分類。確定要刪除嗎？`
+                : '確定要刪除此計畫嗎？';
+            if (!confirm(msg)) return;
+            showLoading('刪除計畫中…');
+            await DataLayer.deleteProject(projectId);
+            hideLoading();
+            showNotification('計畫已刪除', 'success');
+        },
+
+        editProject(projectId) {
+            const p = State.projects.find(p => p.id === projectId);
+            if (!p) return;
+            document.getElementById('editProjectId').value   = p.id;
+            document.getElementById('editProjectName').value = p.name;
+            document.getElementById('editProjectDesc').value = p.description || '';
+            document.getElementById('editProjectModal').classList.add('active');
+        },
+
+        closeEditProjectModal() {
+            document.getElementById('editProjectModal').classList.remove('active');
+        },
+
+        /* ── 三層篩選 ── */
+        renderProjectFilters() {
+            const f = State.filter;
+            const container = document.getElementById('projectFilters');
+            if (!container) return;
+            container.innerHTML =
+                `<button class="filter-btn ${f.project === 'all' ? 'active' : ''}" onclick="UI.filterByProject('all', this)">全部計畫 (${State.references.length})</button>` +
+                State.projects.map(p => {
+                    const cnt = State.references.filter(r => r.projectId === p.id).length;
+                    return `<button class="filter-btn ${f.project === p.id ? 'active' : ''}" onclick="UI.filterByProject(${p.id}, this)">${p.name} (${cnt})</button>`;
+                }).join('');
+            this.renderCitedFilters();
+            this.renderKeywordFilters();
+            this.applyAllFilters();
+        },
+
+        filterByProject(projectId, btn) {
+            State.filter.project = projectId;
+            State.filter.cited   = 'all';
+            State.filter.keyword = 'all';
+            document.querySelectorAll('#projectFilters .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.renderCitedFilters();
+            this.renderKeywordFilters();
+            this.applyAllFilters();
+        },
+
+        renderCitedFilters() {
+            const container = document.getElementById('citedFilterContainer');
+            const f = State.filter;
+            let scope = f.project === 'all' ? [...State.references] : State.references.filter(r => r.projectId === f.project);
+            const citedCnt    = scope.filter(r => r.isCited).length;
+            const notCitedCnt = scope.filter(r => !r.isCited).length;
+            container.innerHTML = `<div class="cited-filter-section">
+                <h4>📌 第二層・引用狀態</h4>
+                <button class="filter-btn ${f.cited==='all'?'active':''}" onclick="UI.filterByCited('all', this)">全部 (${scope.length})</button>
+                <button class="filter-btn ${f.cited==='cited'?'active':''}" onclick="UI.filterByCited('cited', this)">✓ 已引用 (${citedCnt})</button>
+                <button class="filter-btn ${f.cited==='notcited'?'active':''}" onclick="UI.filterByCited('notcited', this)">○ 未引用 (${notCitedCnt})</button>
+            </div>`;
+        },
+
+        filterByCited(val, btn) {
+            State.filter.cited = val;
+            document.querySelectorAll('#citedFilterContainer .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.applyAllFilters();
+        },
+
+        renderKeywordFilters() {
+            const container = document.getElementById('keywordFiltersContainer');
+            const f = State.filter;
+            if (f.project === 'all') { container.innerHTML = ''; return; }
+            const scope = State.references.filter(r => r.projectId === f.project);
+            let citedScope = scope;
+            if (f.cited === 'cited')    citedScope = scope.filter(r => r.isCited);
+            if (f.cited === 'notcited') citedScope = scope.filter(r => !r.isCited);
+            const map = new Map();
+            citedScope.forEach(ref =>
+                (ref.keywords || '').split(/[,，、]/).map(k => k.trim()).filter(Boolean)
+                    .forEach(kw => map.set(kw, (map.get(kw) || 0) + 1))
+            );
+            if (map.size === 0) { container.innerHTML = ''; return; }
+            const btns = Array.from(map.entries()).sort((a, b) => b[1] - a[1])
+                .map(([kw, cnt]) =>
+                    `<button class="filter-btn ${f.keyword===kw?'active':''}" onclick="UI.filterByKeyword('${kw.replace(/'/g,"\\'")}', this)">${kw} (${cnt})</button>`
+                ).join('');
+            container.innerHTML = `<div class="keyword-filter-section">
+                <h4>🔖 第三層・引用主題</h4>
+                <button class="filter-btn ${f.keyword==='all'?'active':''}" onclick="UI.filterByKeyword('all', this)">全部主題</button>
+                ${btns}</div>`;
+        },
+
+        filterByKeyword(kw, btn) {
+            State.filter.keyword = kw;
+            document.querySelectorAll('#keywordFiltersContainer .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.applyAllFilters();
+        },
+
+        applyAllFilters() {
+            const f = State.filter;
+            let filtered = [...State.references];
+            if (f.project !== 'all')    filtered = filtered.filter(r => r.projectId === f.project);
+            if (f.cited === 'cited')    filtered = filtered.filter(r => r.isCited);
+            if (f.cited === 'notcited') filtered = filtered.filter(r => !r.isCited);
+            if (f.keyword !== 'all')    filtered = filtered.filter(r =>
+                (r.keywords || '').split(/[,，、]/).map(k => k.trim()).includes(f.keyword));
+            if (f.search) {
+                filtered = filtered.filter(r =>
+                    [r.refContent, r.journalTitle, r.originalJournalTitle, r.keywords, r.journalAPA, r.originalAPA]
+                        .join(' ').toLowerCase().includes(f.search));
+            }
+            const countEl = document.getElementById('searchResultCount');
+            const active = f.search || f.project !== 'all' || f.keyword !== 'all' || f.cited !== 'all';
+            countEl.style.display = active ? 'block' : 'none';
+            if (active) countEl.textContent = `共找到 ${filtered.length} 筆符合條件的文獻`;
+            this.renderReferenceList(filtered, 'allReferencesContainer');
+        },
+
+        renderReferenceList(refs, containerId) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            if (refs.length === 0) {
+                el.innerHTML = '<p style="color:var(--earth-terracotta);text-align:center;padding:2rem;">沒有符合條件的文獻。</p>';
+                return;
+            }
+            el.innerHTML = refs.map(r => this.createReferenceCard(r)).join('');
+        },
+
+        hl(text) {
+            const s = State.filter.search;
+            if (!s || !text) return text || '';
+            return text.replace(
+                new RegExp(`(${s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                '<span class="highlight">$1</span>'
+            );
+        },
+
+        createReferenceCard(ref) {
+            const project = State.projects.find(p => p.id === ref.projectId);
+            const hl = t => this.hl(t);
+            return `<div class="reference-card">
+                <div class="card-header">
+                    <h3 class="card-title">${hl(ref.journalTitle) || hl(ref.originalJournalTitle) || '無標題'}</h3>
+                </div>
+                ${ref.originalJournalTitle && ref.originalJournalTitle !== ref.journalTitle
+                    ? `<div style="font-size:0.88rem;color:var(--earth-terracotta);margin-bottom:0.8rem;">${hl(ref.originalJournalTitle)}</div>`
+                    : ''}
+                <div class="card-content">${ref.refContent
+                    ? `<p>${hl(ref.refContent).substring(0, 250)}${ref.refContent.length > 250 ? '…' : ''}</p>`
+                    : ''}</div>
+                <div class="card-tags">${(ref.keywords || '').split(/[,，、]/)
+                    .map(kw => `<span class="tag">${hl(kw.trim())}</span>`).join('')}</div>
+                <div class="card-footer">
+                    <div class="card-meta">
+                        <span>計畫: ${project ? project.name : '未分類'}</span>
+                        <span>${new Date(ref.createdAt).toLocaleDateString('zh-TW')}</span>
+                    </div>
+                    <div class="card-actions">
+                        <button class="toggle-cited ${ref.isCited ? 'cited' : 'not-cited'}" onclick="UI.toggleCited(${ref.id})">
+                            ${ref.isCited ? '✓ 已引用' : '○ 未引用'}
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="UI.editReference(${ref.id})">編輯</button>
+                        <button class="btn btn-secondary btn-small" onclick="UI.viewReference(${ref.id})">檢視</button>
+                        <button class="btn btn-danger btn-small" onclick="UI.deleteReference(${ref.id})">刪除</button>
+                    </div>
+                </div>
+            </div>`;
+        },
+
+        async toggleCited(id) {
+            const ref = State.references.find(r => r.id === id);
+            if (!ref) return;
+            ref.isCited   = !ref.isCited;
+            ref.updatedAt = new Date().toISOString();
+            await DataLayer.updateReference({ id: ref.id, isCited: ref.isCited, updatedAt: ref.updatedAt });
+            await Webhook.send(ref);
+            showNotification(`引用狀態已更新：${ref.isCited ? '✓ 已引用' : '○ 未引用'}`, 'success');
+            this.renderCitedFilters();
+            this.renderKeywordFilters();
+        },
+
+        viewReference(id) {
+            const ref     = State.references.find(r => r.id === id);
+            if (!ref) return;
+            const project = State.projects.find(p => p.id === ref.projectId);
+            document.getElementById('viewModalContent').innerHTML = `
+                <div style="line-height:1.8;">
+                    ${ref.refContent ? `<div style="margin-bottom:1.8rem;padding:1.8rem;background:var(--earth-sand);border-radius:14px;"><strong style="display:block;margin-bottom:1rem;color:var(--earth-bark);">引用文獻內容</strong><p style="white-space:pre-wrap;color:var(--earth-soil);line-height:1.8;">${ref.refContent}</p></div>` : ''}
+                    ${ref.journalTitle ? `<div style="margin-bottom:1.2rem;"><strong style="color:var(--earth-bark);">期刊標題</strong><p style="margin-top:0.4rem;">${ref.journalTitle}</p></div>` : ''}
+                    ${ref.originalJournalTitle ? `<div style="margin-bottom:1.2rem;"><strong style="color:var(--earth-bark);">原期刊標題</strong><p style="margin-top:0.4rem;">${ref.originalJournalTitle}</p></div>` : ''}
+                    <div style="margin-bottom:1.2rem;"><strong style="color:var(--earth-bark);">引用主題</strong>
+                        <div class="card-tags" style="margin-top:0.6rem;">${(ref.keywords || '').split(/[,，、]/).map(kw => `<span class="tag">${kw.trim()}</span>`).join('')}</div>
+                    </div>
+                    ${ref.journalAPA ? `<div style="margin-bottom:1.2rem;padding:1.2rem;background:var(--earth-cream);border-radius:10px;"><strong style="color:var(--earth-bark);">期刊 APA</strong><p style="margin-top:0.4rem;font-style:italic;line-height:1.7;">${ref.journalAPA}</p></div>` : ''}
+                    ${ref.originalAPA ? `<div style="margin-bottom:1.2rem;padding:1.2rem;background:var(--earth-cream);border-radius:10px;"><strong style="color:var(--earth-bark);">原期刊 APA</strong><p style="margin-top:0.4rem;font-style:italic;line-height:1.7;">${ref.originalAPA}</p></div>` : ''}
+                    <div style="margin-bottom:1.2rem;"><strong style="color:var(--earth-bark);">所屬計畫</strong><p style="margin-top:0.4rem;">${project ? project.name : '未分類'}</p></div>
+                    <div><strong style="color:var(--earth-bark);">引用狀態</strong>
+                        <span class="tag" style="margin-top:0.4rem;display:inline-block;background:${ref.isCited ? 'var(--earth-moss)' : 'var(--earth-clay)'};">
+                            ${ref.isCited ? '✓ 已引用' : '○ 未引用'}
+                        </span>
+                    </div>
+                </div>`;
+            document.getElementById('viewModal').classList.add('active');
+        },
+
+        closeViewModal()    { document.getElementById('viewModal').classList.remove('active'); },
+
+        async deleteReference(id) {
+            if (!confirm('確定要刪除此文獻嗎？')) return;
+            await DataLayer.deleteReference(id);
+            showNotification('文獻已刪除', 'success');
+        },
+
+        editReference(id) {
+            const ref = State.references.find(r => r.id === id);
+            if (!ref) return;
+            document.getElementById('editRefId').value                = ref.id;
+            document.getElementById('editRefContent').value           = ref.refContent || '';
+            document.getElementById('editJournalTitle').value         = ref.journalTitle || '';
+            document.getElementById('editOriginalJournalTitle').value = ref.originalJournalTitle || '';
+            document.getElementById('editKeywords').value             = ref.keywords || '';
+            document.getElementById('editJournalAPA').value           = ref.journalAPA || '';
+            document.getElementById('editOriginalAPA').value          = ref.originalAPA || '';
+            const sel = document.getElementById('editProjectSelect');
+            sel.innerHTML = '<option value="">請選擇計畫…</option>' +
+                State.projects.map(p =>
+                    `<option value="${p.id}" ${p.id === ref.projectId ? 'selected' : ''}>${p.name}</option>`
+                ).join('');
+            document.getElementById('editRefModal').classList.add('active');
+        },
+
+        closeEditRefModal() { document.getElementById('editRefModal').classList.remove('active'); }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-10  匯出模組
+    ═══════════════════════════════════════════════════════════ */
+    const Export = {
+        downloadCSV() {
+            if (State.references.length === 0) { showNotification('沒有資料可以匯出', 'error'); return; }
+            const headers = ['引用文獻內容','期刊標題','原期刊標題','引用主題','期刊APA','原期刊APA','所屬計畫','是否已引用','建立時間'];
+            const rows = State.references.map(ref => {
+                const proj = State.projects.find(p => p.id === ref.projectId);
+                return [
+                    ref.refContent||'', ref.journalTitle||'', ref.originalJournalTitle||'',
+                    ref.keywords||'', ref.journalAPA||'', ref.originalAPA||'',
+                    proj ? proj.name : '', ref.isCited ? '是' : '否',
+                    new Date(ref.createdAt).toLocaleString('zh-TW')
+                ].map(f => `"${String(f).replace(/"/g, '""')}"`);
+            });
+            const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+            this._download(csv, `${SITE_ID}_文獻資料_${today()}.csv`, 'text/csv;charset=utf-8;');
+            showNotification('CSV 已下載', 'success');
+        },
+
+        downloadJSON() {
+            const data = {
+                site: SITE_ID,
+                references: State.references,
+                projects:   State.projects,
+                exportDate: new Date().toISOString()
+            };
+            this._download(JSON.stringify(data, null, 2), `${SITE_ID}_文獻資料_${today()}.json`, 'application/json');
+            showNotification('JSON 已下載', 'success');
+        },
+
+        _download(content, filename, type) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type }));
+            a.download = filename;
+            a.click();
+        }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       F-11  通用小工具
+    ═══════════════════════════════════════════════════════════ */
+    function show(id) { document.getElementById(id).style.display = ''; }
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+    function today()  { return new Date().toISOString().split('T')[0]; }
+
+    function showLoading(msg = '處理中…') {
+        const el = document.getElementById('loadingOverlay');
+        el.querySelector('p').textContent = msg;
+        el.style.display = 'flex';
+    }
+    function hideLoading() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+    function showNotification(message, type = 'success') {
+        const el = document.createElement('div');
+        el.className = `notification ${type}`;
+        el.textContent = message;
+        document.body.appendChild(el);
+        setTimeout(() => {
+            el.style.animation = 'fadeIn .4s ease reverse';
+            setTimeout(() => el.remove(), 400);
+        }, 3500);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       F-12  事件繫結
+    ═══════════════════════════════════════════════════════════ */
+    function bindForms() {
+        // ── 需求 2：綁定 Modal 表單（Firebase Config + Webhook URL 一起提交）──
+        document.getElementById('bindingForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const config = {
+                apiKey:      document.getElementById('bind_apiKey').value.trim(),
+                authDomain:  document.getElementById('bind_authDomain').value.trim(),
+                projectId:   document.getElementById('bind_projectId').value.trim(),
+                databaseURL: document.getElementById('bind_databaseURL').value.trim()
+            };
+            const webhookUrl = document.getElementById('bind_webhookUrl').value.trim();
+            // 需求 1：透過 BindingManager.save → Store.setJSON，key 帶 STORAGE_PREFIX
+            BindingManager.save(config, webhookUrl);
+        });
+
+        document.getElementById('searchInput').addEventListener('input', e => {
+            State.filter.search = e.target.value.toLowerCase();
+            UI.applyAllFilters();
+        });
+
+        document.getElementById('projectForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const project = {
+                id:          Date.now(),
+                name:        document.getElementById('projectName').value.trim(),
+                description: document.getElementById('projectDesc').value.trim(),
+                createdAt:   new Date().toISOString()
+            };
+            showLoading('新增計畫中…');
+            await DataLayer.saveProject(project);
+            hideLoading();
+            document.getElementById('projectForm').reset();
+            showNotification('計畫已新增', 'success');
+        });
+
+        document.getElementById('editProjectForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const id      = parseInt(document.getElementById('editProjectId').value);
+            const updated = {
+                id,
+                name:        document.getElementById('editProjectName').value.trim(),
+                description: document.getElementById('editProjectDesc').value.trim()
+            };
+            await DataLayer.updateProject(updated);
+            UI.closeEditProjectModal();
+            showNotification('計畫已更新', 'success');
+        });
+
+        document.getElementById('referenceForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const ref = {
+                id:                   Date.now(),
+                refContent:           document.getElementById('refContent').value.trim(),
+                journalTitle:         document.getElementById('journalTitle').value.trim(),
+                originalJournalTitle: document.getElementById('originalJournalTitle').value.trim(),
+                keywords:             document.getElementById('keywords').value.trim(),
+                journalAPA:           document.getElementById('journalAPA').value.trim(),
+                originalAPA:          document.getElementById('originalAPA').value.trim(),
+                projectId:            parseInt(document.getElementById('projectSelect').value) || null,
+                isCited:              false,
+                createdAt:            new Date().toISOString(),
+                updatedAt:            new Date().toISOString()
+            };
+            showLoading('儲存文獻中…');
+            await DataLayer.saveReference(ref);
+            await Webhook.send(ref);
+            hideLoading();
+            document.getElementById('referenceForm').reset();
+            showNotification('✓ 文獻已儲存並同步', 'success');
+        });
+
+        document.getElementById('editRefForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const id  = parseInt(document.getElementById('editRefId').value);
+            const ref = State.references.find(r => r.id === id);
+            if (!ref) return;
+            const updated = {
+                ...ref,
+                refContent:           document.getElementById('editRefContent').value.trim(),
+                journalTitle:         document.getElementById('editJournalTitle').value.trim(),
+                originalJournalTitle: document.getElementById('editOriginalJournalTitle').value.trim(),
+                keywords:             document.getElementById('editKeywords').value.trim(),
+                journalAPA:           document.getElementById('editJournalAPA').value.trim(),
+                originalAPA:          document.getElementById('editOriginalAPA').value.trim(),
+                projectId:            parseInt(document.getElementById('editProjectSelect').value) || null,
+                updatedAt:            new Date().toISOString()
+            };
+            showLoading('更新文獻中…');
+            await DataLayer.saveReference(updated);
+            await Webhook.send(updated);
+            hideLoading();
+            UI.closeEditRefModal();
+            showNotification('✓ 文獻已更新並同步備份', 'success');
+        });
+
+        document.getElementById('webhookForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const url = document.getElementById('webhookUrl').value.trim();
+            if (!url) { showNotification('請輸入有效的 Webhook URL', 'error'); return; }
+            await DataLayer.saveWebhookUrl(url);
+            Webhook.updateStatus();
+            showNotification('✓ Webhook URL 已儲存至 Firebase', 'success');
+        });
+
+        ['viewModal', 'editRefModal', 'editProjectModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        });
+        // bindingModal 不允許點擊背景關閉
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       F-13  暴露公開介面（供 HTML onclick 使用）
+    ═══════════════════════════════════════════════════════════ */
+    window.App            = { clearFirebaseConfig: () => BindingManager.unbind() };
+    window.Auth           = Auth;
+    window.UI             = UI;
+    window.Webhook        = Webhook;
+    window.Export         = Export;
+    window.BindingManager = BindingManager;
+
+    /* ═══════════════════════════════════════════════════════════
+       F-14  啟動序列 — SITE_B 防禦機制（需求 5）
+       流程：
+         1. 讀取 SITE_B_v1_firebase_config → 無則鎖定並彈出 Modal
+         2. 使用具名實例 'site_b_instance' 初始化 Firebase
+         3. 讀取 SITE_B_v1_init_webhook_url 作為初始 Webhook
+         4. onAuthStateChanged → handleStateChange 決定解鎖
+    ═══════════════════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', () => {
+        bindForms();
+
+        // ── 需求 5：Checkpoint — 讀取 STORAGE_PREFIX 對應配置 ──
+        const binding = BindingManager.load();   // 讀 SITE_B_v1_firebase_config
+
+        if (!binding) {
+            // 配置不存在 → 強制鎖定，顯示 Modal，禁止任何操作
+            hideLoading();
+            hide('firebaseConfigSection');
+            hide('loginSection');
+            hide('mainApp');
+            State.isLocked = true;
+            BindingManager.showModal();
+            return;   // 中止，所有後續邏輯不執行
+        }
+
+        // ── 需求 4：具名實例 'site_b_instance' 初始化 ──
+        const initOk = FirebaseInit.init(binding.config);   // 內部固定用 FIREBASE_INSTANCE_NAME
+        if (!initOk) {
+            hideLoading();
+            State.isLocked = true;
+            BindingManager.showModal();
+            return;
+        }
+
+        // 綁定時一起提交的 Webhook URL → 直接寫入 State，等登入後同步到 Firebase
+        if (binding.webhookUrl) {
+            State.webhookUrl = binding.webhookUrl;
+        }
+
+        hide('firebaseConfigSection');
+
+        // ── Checkpoint 3：onAuthStateChanged（解鎖條件：綁定 + 登入）──
+        State.auth.onAuthStateChanged(user => Auth.handleStateChange(user));
+
+        // 啟動後嘗試補發佇列（isLocked 解除後才執行）
+        setTimeout(() => {
+            if (State.isOnline && !State.isLocked && LocalBackup.loadQueue().length > 0) {
+                Webhook.flushQueue();
+            }
+        }, 5000);
+    });
+
+})(); // end IIFE — SITE_B
+</script>
+
+</body>
+</html>
